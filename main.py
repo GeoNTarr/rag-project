@@ -1,3 +1,2 @@
-Главный файл RAG системы 
-import sys 
+import sys
 sys.path.append('src') 
