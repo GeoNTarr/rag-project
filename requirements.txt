@@ -1,5 +1,5 @@
-# RAG Project Requirements 
-python>=3.8 
+# RAG Project Requirements
+python ==3.12
  
 # Core ML 
 torch==2.0.1 
