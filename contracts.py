@@ -99,7 +99,7 @@ class EmbeddingContract(Protocol):
     def get_model_info(self) -> Dict[str, Any]:
         """Returns model information"""
         ...
-    def get_free_embedding_model(self, model_path="./sentence-transformer") -> Any:
+    def get_free_embedding_model(self, model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2") -> Any:
         """Returns free embedding model"""
         ...
 
