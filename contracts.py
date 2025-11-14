@@ -1,286 +1,172 @@
-"""
-Контракты между модулями RAG системы
+# Contracts for RAG pipeline (AlfaBank case)
+# --------------------------------------------
+# Principles:
+# - Free solutions and APIs only
+# - Hit@5 metric
+# - Top-5 documents for each question
+# - Data: Questions.csv and Websites.csv
 
-Каждый участник должен реализовать эти интерфейсы в своих классах
-"""
-
-from typing import List, Dict, Any, Union
+from dataclasses import dataclass
+from typing import List, Dict, Any, Tuple, Protocol
+import pandas as pd
 import numpy as np
 
 
-class DataContract:
-    """Контракт Data Engineer с командой"""
+# === 1 COMMON DATA STRUCTURES ===
 
-    @staticmethod
-    def get_chunks() -> List[str]:
-        """
-        Возвращает список текстовых чанков из базы знаний
+@dataclass
+class Question:
+    q_id: str
+    query: str
 
-        Returns:
-            List[str]: Список текстовых фрагментов для поиска
-        """
-        pass
+@dataclass
+class Document:
+    web_id: str
+    url: str
+    kind: str
+    title: str
+    text: str
 
-    @staticmethod
-    def get_test_questions() -> Dict[str, List[str]]:
-        """
-        Возвращает тестовые вопросы для оценки системы
+@dataclass
+class Chunk:
+    chunk_id: str
+    web_id: str
+    text_chunk: str
 
-        Returns:
-            Dict: {'in_scope': [], 'out_scope': []}
-                  in_scope - вопросы из базы знаний
-                  out_scope - вопросы вне базы знаний
-        """
-        pass
+@dataclass
+class DataBundle:
+    questions: pd.DataFrame
+    websites: pd.DataFrame
+    chunks: pd.DataFrame
 
-    @staticmethod
-    def get_chunking_stats() -> Dict[str, Any]:
-        """
-        Возвращает статистику по чанкам
+@dataclass
+class EmbeddingBundle:
+    chunk_embeddings: np.ndarray
+    question_embeddings: np.ndarray
+    chunk_ids: List[str]
+    question_ids: List[str]
 
-        Returns:
-            Dict: {
-                'total_chunks': int,
-                'avg_chunk_length': float,
-                'min_chunk_length': int, 
-                'max_chunk_length': int,
-                'total_words': int
-            }
-        """
-        pass
-
-
-class MLContract:
-    """Контракт ML-разработчика"""
-
-    @staticmethod
-    def is_relevant(question: str, threshold: float = 0.6) -> bool:
-        """
-        Определяет, относится ли вопрос к базе знаний
-
-        Args:
-            question: Вопрос пользователя
-            threshold: Порог схожести (0.0-1.0)
-
-        Returns:
-            bool: True если вопрос релевантен базе знаний
-        """
-        pass
-
-    @staticmethod
-    def search_similar(question: str, top_k: int = 3) -> List[str]:
-        """
-        Ищет похожие чанки в базе знаний
-
-        Args:
-            question: Вопрос пользователя
-            top_k: Количество возвращаемых чанков
-
-        Returns:
-            List[str]: Релевантные текстовые чанки
-        """
-        pass
-
-    @staticmethod
-    def get_similarity_score(question: str) -> float:
-        """
-        Возвращает оценку схожести вопроса с базой знаний
-
-        Args:
-            question: Вопрос пользователя
-
-        Returns:
-            float: Оценка схожести (0.0-1.0)
-        """
-        pass
-
-    @staticmethod
-    def build_index(chunks: List[str], embedding_model: Any):
-        """
-        Строит векторный индекс из чанков
-
-        Args:
-            chunks: Список текстовых чанков
-            embedding_model: Модель для создания эмбеддингов
-        """
-        pass
-
-    @staticmethod
-    def set_threshold(threshold: float):
-        """
-        Устанавливает порог релевантности
-
-        Args:
-            threshold: Новый порог (0.0-1.0)
-        """
-        pass
+@dataclass
+class RetrievalResult:
+    q_id: str
+    top_docs: List[str]  # web_id of top-5 documents
+    scores: List[float]  # relevance scores
 
 
-class NLPContract:
-    """Контракт NLP-инженера"""
+# === 2 DATA CONTRACT (Data Engineer) ===
 
-    @staticmethod
-    def generate_answer(context: List[str], question: str) -> str:
-        """
-        Генерирует ответ на основе контекста
+class DataContract(Protocol):
+    """Contract for loading and preparing data"""
 
-        Args:
-            context: Релевантные чанки из базы знаний
-            question: Вопрос пользователя
+    def load_questions(self, file_path: str = "Questions.csv") -> pd.DataFrame:
+        """Loads questions from CSV"""
+        ...
+    
+    def load_websites(self, file_path: str = "Websites.csv") -> pd.DataFrame:
+        """Loads web pages from CSV"""
+        ...
 
-        Returns:
-            str: Сгенерированный ответ
-        """
-        pass
+    def preprocess_text(self, text: str) -> str:
+        """Cleans and normalizes text (HTML tags, extra spaces, etc.)"""
+        ...
 
-    @staticmethod
-    def get_embeddings(texts: List[str]) -> Union[np.ndarray, Any]:
-        """
-        Создает эмбеддинги для текстов
+    def chunk_documents(self, df: pd.DataFrame, chunk_size: int = 512, overlap: int = 50) -> pd.DataFrame:
+        """Splits documents into overlapping chunks"""
+        ...
 
-        Args:
-            texts: Список текстов для векторизации
+    def build_data_bundle(self, questions_path: str = "Questions.csv", websites_path: str = "Websites.csv") -> DataBundle:
+        """Creates complete data package for the pipeline"""
+        ...
 
-        Returns:
-            np.ndarray или torch.Tensor: Векторные представления текстов
-        """
-        pass
-
-    @staticmethod
-    def get_refusal_response(question: str) -> str:
-        """
-        Генерирует вежливый отказ для вопросов вне базы знаний
-
-        Args:
-            question: Вопрос пользователя
-
-        Returns:
-            str: Текст отказа
-        """
-        pass
-
-    @staticmethod
-    def get_embedding_dimension() -> int:
-        """
-        Возвращает размерность эмбеддингов
-
-        Returns:
-            int: Размерность векторных представлений
-        """
-        pass
+    def validate_data_quality(self) -> Dict[str, Any]:
+        """Validates data quality (missing values, duplicates)"""
+        ...
 
 
-class EvaluationContract:
-    """Контракт Data Scientist"""
+# === 3 EMBEDDING CONTRACT (NLP Engineer) ===
 
-    @staticmethod
-    def calculate_metrics(true_labels: List[bool], predictions: List[bool]) -> Dict[str, float]:
-        """
-        Вычисляет метрики качества системы
+class EmbeddingContract(Protocol):
+    """Contract for working with embeddings"""
 
-        Args:
-            true_labels: Истинные метки (True/False)
-            predictions: Предсказания системы (True/False)
+    def get_embeddings(self, texts: List[str]) -> np.ndarray:
+        """Creates embeddings for a list of texts"""
+        ...
 
-        Returns:
-            Dict: {
-                'accuracy': float,
-                'precision': float, 
-                'recall': float,
-                'f1_score': float,
-                'specificity': float
-            }
-        """
-        pass
+    def get_embedding_dimension(self) -> int:
+        """Returns embedding dimensions"""
+        ...
 
-    @staticmethod
-    def run_comprehensive_tests(rag_system: Any) -> Dict[str, Any]:
-        """
-        Запускает комплексное тестирование системы
+    def get_model_info(self) -> Dict[str, Any]:
+        """Returns model information"""
+        ...
+    def get_free_embedding_model(self, model_path="./sentence-transformer") -> Any:
+        """Returns free embedding model"""
+        ...
 
-        Args:
-            rag_system: Объект RAG системы
+    def get_free_reranker(self) -> Any:
+        """Returns free reranker (optional for quality improvement)"""
+        ...
 
-        Returns:
-            Dict: Результаты тестирования {
-                'performance': Dict,
-                'accuracy': Dict, 
-                'edge_cases': Dict,
-                'summary': Dict
-            }
-        """
-        pass
-
-    @staticmethod
-    def find_optimal_threshold(test_questions: Dict[str, List[str]], rag_system: Any) -> float:
-        """
-        Находит оптимальный порог для детектора незнания
-
-        Args:
-            test_questions: {'in_scope': [], 'out_scope': []}
-            rag_system: Объект RAG системы
-
-        Returns:
-            float: Оптимальный порог
-        """
-        pass
-
-    @staticmethod
-    def calculate_response_time_metrics(response_times: List[float]) -> Dict[str, float]:
-        """
-        Рассчитывает метрики времени ответа
-
-        Args:
-            response_times: Список времен ответа в секундах
-
-        Returns:
-            Dict: {
-                'mean_response_time': float,
-                'median_response_time': float,
-                'p95_response_time': float
-            }
-        """
-        pass
+    def get_available_models(self) -> List[str]:
+        """Returns list of available free models"""
+        ...
 
 
-class IntegrationContract:
-    """Контракт Team Lead (для интеграции)"""
+# === 4 RETRIEVAL CONTRACT (ML Developer) ===
 
-    @staticmethod
-    def integrate_all_modules() -> bool:
-        """
-        Интегрирует все модули от команды
+class RetrievalContract(Protocol):
+    """Contract for retrieval part (indexing + search)"""
 
-        Returns:
-            bool: True если интеграция успешна
-        """
-        pass
+    def build_vector_index(self, embeddings: np.ndarray, chunk_ids: List[str]) -> Any:
+        """Builds vector index (FAISS/Annoy)"""
+        ...
 
-    @staticmethod
-    def process_question(question: str) -> Dict[str, Any]:
-        """
-        Обрабатывает вопрос через полный пайплайн
+    def search_similar(self, query_embedding: np.ndarray, top_k: int = 5) -> List[Tuple[str, float]]:
+        """Searches for top-K similar chunks (chunk_id, score)"""
+        ...
 
-        Args:
-            question: Вопрос пользователя
+    def retrieve_for_question(self, question: str, embedding_model: EmbeddingContract, top_k: int = 5) -> List[Tuple[str, float]]:
+        """Performs search for a single question"""
+        ...
 
-        Returns:
-            Dict: {
-                'question': str,
-                'answer': str,
-                'is_relevant': bool,
-                'relevance_score': float,
-                'context': List[str],
-                'response_type': str,
-                'processing_time': float,
-                'success': bool
-            }
-        """
-        pass
+    def batch_retrieve(self, questions: List[str], embedding_model: EmbeddingContract, top_k: int = 5) -> List[RetrievalResult]:
+        """Performs search for a list of questions"""
+        ...
 
-    @staticmethod
-    def setup_rag_system():
-        """
-        Настраивает RAG систему с данными
-        """
-        pass
+
+# === 5 EVALUATION CONTRACT (Data Scientist) ===
+
+class EvaluationContract(Protocol):
+    """Contract for quality evaluation"""
+
+    def calculate_hit_at_k(self, true_relevant: List[List[str]], predicted: List[List[str]], k: int = 5) -> float:
+        """Calculates Hit@K for a set of questions"""
+        ...
+
+    def generate_submission_file(self, results: List[RetrievalResult], output_path: str = "submission.csv") -> pd.DataFrame:
+        """Generates CSV file for submission"""
+        ...
+
+    def analyze_retrieval_quality(self, results: List[RetrievalResult]) -> Dict[str, Any]:
+        """Analyzes retrieval quality (score distribution, etc.)"""
+        ...
+
+
+# === 6 PIPELINE CONTRACT (Team Lead) ===
+
+class PipelineContract(Protocol):
+    """Contract for running the entire RAG pipeline"""
+
+    def run_full_pipeline(self, questions_path: str = "Questions.csv", websites_path: str = "Websites.csv") -> Dict[str, Any]:
+        """Runs the complete process: data -> embeddings -> index -> search -> evaluation"""
+        ...
+
+    def validate_data(self, questions_path: str, websites_path: str) -> bool:
+        """Validates input data correctness"""
+        ...
+
+    def generate_final_submission(self) -> str:
+        """Generates final submission file"""
+        ...
+
+

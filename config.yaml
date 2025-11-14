@@ -1,3 +1,45 @@
-# Љ®­дЁЈга жЁп RAG бЁбвҐ¬л 
-project: 
-  name: "RAG System" 
+# Конфигурация RAG системы
+
+project:
+  name: "RAG Question Answering System"
+  version: "1.0.0"
+  description: "Умная система вопросов и ответов с детекцией нерелевантных вопросов"
+  team:
+    - "Data Engineer"
+    - "ML Developer"
+    - "NLP Engineer"
+    - "Data Scientist"
+    - "Team Lead"
+
+model:
+  embedding_model: "all-MiniLM-L6-v2"
+  similarity_threshold: 0.6
+  device: "auto"  # auto/cuda/cpu
+  top_k: 3
+
+data:
+  chunk_size: 500
+  chunk_overlap: 50
+  data_path: "data/raw"
+  processed_path: "data/processed"
+  encoding: "utf-8"
+
+evaluation:
+  test_cases: 20
+  metrics: ["accuracy", "precision", "recall", "f1_score"]
+  threshold_range: [0.1, 0.9]
+  threshold_steps: 50
+
+nlp:
+  answer_template: "Ответь на вопрос на основе контекста. Контекст: {context}\nВопрос: {question}\nОтвет:"
+  refusal_template: "Извините, но я не могу ответить на этот вопрос на основе имеющейся у меня информации. Вопрос: {question}"
+  max_answer_length: 500
+
+interface:
+  enable_web: true
+  port: 8501
+  theme: "light"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
