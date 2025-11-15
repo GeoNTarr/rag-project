@@ -1,20 +1,20 @@
 """
-Главный файл RAG системы
+Р“Р»Р°РІРЅС‹Р№ С„Р°Р№Р» RAG СЃРёСЃС‚РµРјС‹
 
-Требования:
+РўСЂРµР±РѕРІР°РЅРёСЏ:
 - Python 3.8+
-- Все зависимости из requirements.txt
+- Р’СЃРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РёР· requirements.txt
 
-Запуск:
-1. Установить зависимости: pip install -r requirements.txt
-2. Запустить: python main.py
+Р—Р°РїСѓСЃРє:
+1. РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё: pip install -r requirements.txt
+2. Р—Р°РїСѓСЃС‚РёС‚СЊ: python main.py
 
-Команда:
+РљРѕРјР°РЅРґР°:
 - Data Engineer: src/data/
-- ML Developer: src/ml/ 
+- ML Developer: src/ml/
 - NLP Engineer: src/nlp/
 - Data Scientist: src/evaluation/
-- Team Lead: интеграция и интерфейс
+- Team Lead: РёРЅС‚РµРіСЂР°С†РёСЏ Рё РёРЅС‚РµСЂС„РµР№СЃ
 """
 
 import torch
@@ -24,114 +24,114 @@ import yaml
 from typing import Dict, Any, List
 import time
 
-# Добавляем src в путь для импортов
+# Р”РѕР±Р°РІР»СЏРµРј src РІ РїСѓС‚СЊ РґР»СЏ РёРјРїРѕСЂС‚РѕРІ
 sys.path.append('src')
 
 
 class ProjectIntegrator:
-    """Интегратор всей RAG системы"""
+    """РРЅС‚РµРіСЂР°С‚РѕСЂ РІСЃРµР№ RAG СЃРёСЃС‚РµРјС‹"""
 
     def __init__(self, config_path: str = "config.yaml"):
         self.device = self.setup_device()
         self.components: Dict[str, Any] = {}
         self.config = self.load_config(config_path)
-        print(f"? Инициализация системы на устройстве: {self.device}")
+        print(f"? РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРёСЃС‚РµРјС‹ РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРµ: {self.device}")
 
     def setup_device(self) -> str:
-        """Настраивает вычислительное устройство (GPU/CPU)"""
+        """РќР°СЃС‚СЂР°РёРІР°РµС‚ РІС‹С‡РёСЃР»РёС‚РµР»СЊРЅРѕРµ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ (GPU/CPU)"""
         if torch.cuda.is_available():
             gpu_name = torch.cuda.get_device_name(0)
             gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
-            print(f"? GPU обнаружена: {gpu_name} ({gpu_memory:.1f} GB)")
+            print(f"? GPU РѕР±РЅР°СЂСѓР¶РµРЅР°: {gpu_name} ({gpu_memory:.1f} GB)")
             return "cuda"
         else:
-            print("?? GPU не обнаружена, используем CPU")
+            print("?? GPU РЅРµ РѕР±РЅР°СЂСѓР¶РµРЅР°, РёСЃРїРѕР»СЊР·СѓРµРј CPU")
             return "cpu"
 
     def load_config(self, config_path: str) -> Dict[str, Any]:
-        """Загружает конфигурацию из YAML файла"""
+        """Р—Р°РіСЂСѓР¶Р°РµС‚ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РёР· YAML С„Р°Р№Р»Р°"""
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 return yaml.safe_load(f)
         except FileNotFoundError:
-            print(f"?? Конфигурационный файл {config_path} не найден, используются значения по умолчанию")
+            print(f"?? РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р» {config_path} РЅРµ РЅР°Р№РґРµРЅ, РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ Р·РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ")
             return {}
         except Exception as e:
-            print(f"? Ошибка загрузки конфигурации: {e}")
+            print(f"? РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РєРѕРЅС„РёРіСѓСЂР°С†РёРё: {e}")
             return {}
 
     def integrate_all_modules(self):
-        """Интегрирует все модули от команды"""
+        """РРЅС‚РµРіСЂРёСЂСѓРµС‚ РІСЃРµ РјРѕРґСѓР»Рё РѕС‚ РєРѕРјР°РЅРґС‹"""
         try:
-            print("? Интеграция модулей...")
+            print("? РРЅС‚РµРіСЂР°С†РёСЏ РјРѕРґСѓР»РµР№...")
 
-            # Импортируем модули команды
+            # РРјРїРѕСЂС‚РёСЂСѓРµРј РјРѕРґСѓР»Рё РєРѕРјР°РЅРґС‹
             from src.data.data_loader import DataLoader
             from src.ml.rag_system import RAGSystem
             from src.nlp.embeddings import EmbeddingModel
             from src.nlp.prompt_engine import PromptEngine
             from src.evaluation.tester import SystemTester
 
-            # Инициализируем компоненты
+            # РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РєРѕРјРїРѕРЅРµРЅС‚С‹
             self.components['data_loader'] = DataLoader()
             self.components['embedding_model'] = EmbeddingModel(device=self.device)
             self.components['rag_system'] = RAGSystem(device=self.device)
             self.components['prompt_engine'] = PromptEngine(device=self.device)
             self.components['evaluator'] = SystemTester()
 
-            # Настраиваем систему
+            # РќР°СЃС‚СЂР°РёРІР°РµРј СЃРёСЃС‚РµРјСѓ
             self.setup_rag_system()
 
-            print("? Все модули успешно интегрированы")
+            print("? Р’СЃРµ РјРѕРґСѓР»Рё СѓСЃРїРµС€РЅРѕ РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅС‹")
 
         except ImportError as e:
-            print(f"? Ошибка импорта модулей: {e}")
-            print("Убедитесь, что все участники создали свои классы")
+            print(f"? РћС€РёР±РєР° РёРјРїРѕСЂС‚Р° РјРѕРґСѓР»РµР№: {e}")
+            print("РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ РІСЃРµ СѓС‡Р°СЃС‚РЅРёРєРё СЃРѕР·РґР°Р»Рё СЃРІРѕРё РєР»Р°СЃСЃС‹")
             return False
         except Exception as e:
-            print(f"? Ошибка интеграции: {e}")
+            print(f"? РћС€РёР±РєР° РёРЅС‚РµРіСЂР°С†РёРё: {e}")
             return False
 
         return True
 
     def setup_rag_system(self):
-        """Настраивает RAG систему с данными"""
-        print("? Загрузка и подготовка данных...")
+        """РќР°СЃС‚СЂР°РёРІР°РµС‚ RAG СЃРёСЃС‚РµРјСѓ СЃ РґР°РЅРЅС‹РјРё"""
+        print("? Р—Р°РіСЂСѓР·РєР° Рё РїРѕРґРіРѕС‚РѕРІРєР° РґР°РЅРЅС‹С…...")
 
-        # Получаем чанки от Data Engineer
+        # РџРѕР»СѓС‡Р°РµРј С‡Р°РЅРєРё РѕС‚ Data Engineer
         chunks = self.components['data_loader'].get_chunks()
-        print(f"? Загружено {len(chunks)} чанков")
+        print(f"? Р—Р°РіСЂСѓР¶РµРЅРѕ {len(chunks)} С‡Р°РЅРєРѕРІ")
 
-        # Строим векторный индекс
+        # РЎС‚СЂРѕРёРј РІРµРєС‚РѕСЂРЅС‹Р№ РёРЅРґРµРєСЃ
         self.components['rag_system'].build_index(
             chunks=chunks,
             embedding_model=self.components['embedding_model']
         )
 
-        # Настраиваем порог релевантности
+        # РќР°СЃС‚СЂР°РёРІР°РµРј РїРѕСЂРѕРі СЂРµР»РµРІР°РЅС‚РЅРѕСЃС‚Рё
         threshold = self.config.get('model', {}).get('similarity_threshold', 0.6)
         self.components['rag_system'].set_threshold(threshold)
 
-        print("? RAG система настроена и готова к работе")
+        print("? RAG СЃРёСЃС‚РµРјР° РЅР°СЃС‚СЂРѕРµРЅР° Рё РіРѕС‚РѕРІР° Рє СЂР°Р±РѕС‚Рµ")
 
     def process_question(self, question: str) -> Dict[str, Any]:
         """
-        Обрабатывает вопрос через полный пайплайн
+        РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РІРѕРїСЂРѕСЃ С‡РµСЂРµР· РїРѕР»РЅС‹Р№ РїР°Р№РїР»Р°Р№РЅ
 
         Args:
-            question: Вопрос пользователя
+            question: Р’РѕРїСЂРѕСЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 
         Returns:
-            Dict: Результат обработки
+            Dict: Р РµР·СѓР»СЊС‚Р°С‚ РѕР±СЂР°Р±РѕС‚РєРё
         """
         start_time = time.time()
 
         try:
-            # 1. Проверка релевантности
+            # 1. РџСЂРѕРІРµСЂРєР° СЂРµР»РµРІР°РЅС‚РЅРѕСЃС‚Рё
             is_relevant = self.components['rag_system'].is_relevant(question)
             relevance_score = self.components['rag_system'].get_similarity_score(question)
 
-            # 2. Поиск контекста и генерация ответа
+            # 2. РџРѕРёСЃРє РєРѕРЅС‚РµРєСЃС‚Р° Рё РіРµРЅРµСЂР°С†РёСЏ РѕС‚РІРµС‚Р°
             if is_relevant:
                 context = self.components['rag_system'].search_similar(question)
                 answer = self.components['prompt_engine'].generate_answer(context, question)
@@ -157,7 +157,7 @@ class ProjectIntegrator:
         except Exception as e:
             return {
                 "question": question,
-                "answer": f"Ошибка обработки: {str(e)}",
+                "answer": f"РћС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё: {str(e)}",
                 "is_relevant": False,
                 "relevance_score": 0.0,
                 "context": [],
@@ -167,84 +167,89 @@ class ProjectIntegrator:
             }
 
     def run_demo(self):
-        """Запускает демонстрацию работы системы"""
-        print("\n? Демонстрация RAG системы")
+        """Р—Р°РїСѓСЃРєР°РµС‚ РґРµРјРѕРЅСЃС‚СЂР°С†РёСЋ СЂР°Р±РѕС‚С‹ СЃРёСЃС‚РµРјС‹"""
+        print("\n? Р”РµРјРѕРЅСЃС‚СЂР°С†РёСЏ RAG СЃРёСЃС‚РµРјС‹")
         print("=" * 50)
 
-        # Тестовые вопросы для демонстрации
+        # РўРµСЃС‚РѕРІС‹Рµ РІРѕРїСЂРѕСЃС‹ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё
         demo_questions = [
-            "Что такое Python?",
-            "Объясните машинное обучение",
-            "Сколько планет в солнечной системе?",
-            "Как работает RAG?",
-            "Кто президент России?"
+            "Р§С‚Рѕ С‚Р°РєРѕРµ Python?",
+            "РћР±СЉСЏСЃРЅРёС‚Рµ РјР°С€РёРЅРЅРѕРµ РѕР±СѓС‡РµРЅРёРµ",
+            "РЎРєРѕР»СЊРєРѕ РїР»Р°РЅРµС‚ РІ СЃРѕР»РЅРµС‡РЅРѕР№ СЃРёСЃС‚РµРјРµ?",
+            "РљР°Рє СЂР°Р±РѕС‚Р°РµС‚ RAG?",
+            "РљС‚Рѕ РїСЂРµР·РёРґРµРЅС‚ Р РѕСЃСЃРёРё?"
         ]
 
-        print("? Примеры вопросов для тестирования:")
+        print("? РџСЂРёРјРµСЂС‹ РІРѕРїСЂРѕСЃРѕРІ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ:")
         for i, question in enumerate(demo_questions, 1):
             print(f"  {i}. {question}")
 
         print("\n" + "=" * 50)
 
         while True:
-            question = input("\n? Ваш вопрос (или 'выход' для завершения): ").strip()
+            question = input("\n? Р’Р°С€ РІРѕРїСЂРѕСЃ (РёР»Рё 'РІС‹С…РѕРґ' РґР»СЏ Р·Р°РІРµСЂС€РµРЅРёСЏ): ").strip()
 
-            if question.lower() in ['выход', 'exit', 'quit']:
+            if question.lower() in ['РІС‹С…РѕРґ', 'exit', 'quit']:
                 break
             if not question:
                 continue
 
-            # Обработка вопроса
+            # РћР±СЂР°Р±РѕС‚РєР° РІРѕРїСЂРѕСЃР°
             result = self.process_question(question)
 
-            # Вывод результата
-            print(f"\n? Результат:")
-            print(f"   ? Ответ: {result['answer']}")
-            print(f"   ? Релевантность: {result['relevance_score']:.3f} ({result['is_relevant']})")
-            print(f"   ?? Время обработки: {result['processing_time']:.2f} сек")
+            # Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р°
+            print(f"\n? Р РµР·СѓР»СЊС‚Р°С‚:")
+            print(f"   ? РћС‚РІРµС‚: {result['answer']}")
+            print(f"   ? Р РµР»РµРІР°РЅС‚РЅРѕСЃС‚СЊ: {result['relevance_score']:.3f} ({result['is_relevant']})")
+            print(f"   ?? Р’СЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё: {result['processing_time']:.2f} СЃРµРє")
 
             if result['context']:
-                print(f"   ? Использовано чанков: {len(result['context'])}")
+                print(f"   ? РСЃРїРѕР»СЊР·РѕРІР°РЅРѕ С‡Р°РЅРєРѕРІ: {len(result['context'])}")
 
     def run_evaluation(self):
-        """Запускает оценку системы"""
-        print("\n? Запуск оценки системы...")
+        """Р—Р°РїСѓСЃРєР°РµС‚ РѕС†РµРЅРєСѓ СЃРёСЃС‚РµРјС‹"""
+        print("\n? Р—Р°РїСѓСЃРє РѕС†РµРЅРєРё СЃРёСЃС‚РµРјС‹...")
 
         try:
             test_results = self.components['evaluator'].run_comprehensive_tests(self.components['rag_system'])
 
-            print("? Результаты оценки:")
+            print("? Р РµР·СѓР»СЊС‚Р°С‚С‹ РѕС†РµРЅРєРё:")
             for metric, value in test_results.items():
                 print(f"   {metric}: {value}")
 
         except Exception as e:
-            print(f"? Ошибка оценки: {e}")
+            print(f"? РћС€РёР±РєР° РѕС†РµРЅРєРё: {e}")
 
 
 def main():
-    """Главная функция запуска системы"""
+    """Р“Р»Р°РІРЅР°СЏ С„СѓРЅРєС†РёСЏ Р·Р°РїСѓСЃРєР° СЃРёСЃС‚РµРјС‹"""
     print("=" * 60)
-    print("? RAG System - Умная система вопросов и ответов")
+    print("? RAG System - РЈРјРЅР°СЏ СЃРёСЃС‚РµРјР° РІРѕРїСЂРѕСЃРѕРІ Рё РѕС‚РІРµС‚РѕРІ")
     print("=" * 60)
 
-    # Инициализация интегратора
+    # РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµРіСЂР°С‚РѕСЂР°
     integrator = ProjectIntegrator()
 
-    # Интеграция модулей
+    # РРЅС‚РµРіСЂР°С†РёСЏ РјРѕРґСѓР»РµР№
     success = integrator.integrate_all_modules()
 
     if not success:
-        print("? Не удалось интегрировать модули. Завершение работы.")
+        print("? РќРµ СѓРґР°Р»РѕСЃСЊ РёРЅС‚РµРіСЂРёСЂРѕРІР°С‚СЊ РјРѕРґСѓР»Рё. Р—Р°РІРµСЂС€РµРЅРёРµ СЂР°Р±РѕС‚С‹.")
         return
 
-    # Запуск демо
+    # Р—Р°РїСѓСЃРє РґРµРјРѕ
     integrator.run_demo()
 
-    # Оценка системы
+    # РћС†РµРЅРєР° СЃРёСЃС‚РµРјС‹
     integrator.run_evaluation()
 
-    print("\n? Завершение работы системы")
+    print("\n? Р—Р°РІРµСЂС€РµРЅРёРµ СЂР°Р±РѕС‚С‹ СЃРёСЃС‚РµРјС‹")
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
